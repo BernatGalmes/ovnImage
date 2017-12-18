@@ -21,6 +21,7 @@ def potencia(input, min_n_items=1, max_n_items=None):
     FILE SYSTEM FUNCTIONS
 """
 
+
 def check_dir(path):
     """
     Check if the specified path exists into file system. If not exists, it is created
