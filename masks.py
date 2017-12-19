@@ -289,3 +289,33 @@ def mask_build_circular_boolean(image, circle):
     cv2.circle(mask, center, radius, (255), -1)
 
     return np.asarray(mask, dtype=np.bool)
+
+def mask_biggest_connected_component(mask):
+    """
+    returns the bigger connected component of finger mask
+    :param f_mask:
+    :return:
+    """
+    mask = mask.astype(np.uint8)
+
+    f_m_binary = mask.copy()
+    f_m_binary[f_m_binary != 0] = 255
+    f_m_binary = f_m_binary.copy()
+
+    # Find the largest contour and extract it
+    im, contours, hierarchy = cv2.findContours(f_m_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    if len(contours) == 0:
+        return mask  # TODO: informar al programa principal
+
+    maxContour = 0
+    for contour in contours:
+        contourSize = cv2.contourArea(contour)
+        if contourSize > maxContour:
+            maxContour = contourSize
+            maxContourData = contour
+
+    # Create a mask from the largest contour
+    mask = np.zeros_like(f_m_binary)
+    cv2.fillPoly(mask, [maxContourData], 1)
+
+    return mask
