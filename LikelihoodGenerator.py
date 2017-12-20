@@ -4,16 +4,33 @@ from bern_img_utils.masks import mask_fill_holes
 
 
 class LikelihoodGenerator:
+    """
+    Class to help to generate likelihood masks of regions of
+    interest in images.
+
+    Build your likelihood by marking with the mouse the contours of
+    the roi region.
+
+    Keyboard commands:
+    key a: Submit region selected.
+    keb b: discard last mouse click
+
+    Example of use:
+    >>> image = "RGB image matrix"
+    >>> path_output_file = "Path to save the likelihood"
+    >>> LikelihoodGenerator(image).build_your_mask(path_output_file)
+    """
+
     def __init__(self, image):
         """
-        Init an object to select finger_regions of an image
+        Init an object to build the interest region of an image
         :param image: RGB image
         """
         self.image = image.copy()
 
         self.in_points = []  # etiquetes de les finger_regions seleccionades
 
-    def __fillEvent(self, event, x, y, flags, param):
+    def __fill_event(self, event, x, y, flags, param):
         """
         Event to execute when click onto a region
         :param event:
@@ -47,7 +64,7 @@ class LikelihoodGenerator:
         key = 0
         while "a" != chr(key & 255):
             cv2.namedWindow("image", flags=cv2.WINDOW_NORMAL)
-            cv2.setMouseCallback("image", self.__fillEvent)
+            cv2.setMouseCallback("image", self.__fill_event)
             cv2.resizeWindow('image', 600, 600)
 
             # display the image and wait for a keypress

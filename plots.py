@@ -1,5 +1,7 @@
 import cv2
+import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 def drawCircle(image, center_x, center_y, radius, color):
@@ -26,8 +28,10 @@ def drawCircles(image, circles, mark_circle):
     """
     Draw multiple circles onto the image of red color. And draw the 'mark_circle' whith green color
     :param image: rgb image
-    :param circles: (int, int, int)[]
-    :param mark_circle: Circle
+    :param circles: Circle[]
+                    Circle => Tuple(center_x, center_y, radius)
+    :param mark_circle: Circle circle to remark
+                        Circle => Tuple(center_x, center_y, radius)
     :return:
     """
     for center_x, center_y, radius in circles:
@@ -37,6 +41,14 @@ def drawCircles(image, circles, mark_circle):
 
 
 def plotimg(image, filename=None, title=''):
+    """
+    Plot a single image in x window or on a file as a figure.
+
+    :param image:
+    :param filename:
+    :param title:
+    :return:
+    """
     plt.title(title)
     plt.imshow(image)
 
@@ -49,10 +61,17 @@ def plotimg(image, filename=None, title=''):
 
 def multiplot(images, filename=None, nrows=2, colorbar=False):
     """
-    DESCRIPTION
-    :param images: dictionary
-    :param filename:
-    :param colorbar:
+    Help to plot a multiple image figure
+    :param images: list of dictionaries with structure:
+        {
+        "img": image to plot,
+        "title": name of the plot
+        }
+    :param filename: String|None
+                        Path file Where save the figure,
+                        None to plot in a window
+    :param colorbar: bool
+                        true to plot a colorbar near each image
     :return:
     """
 
@@ -87,3 +106,26 @@ def multiplot(images, filename=None, nrows=2, colorbar=False):
     plt.close()
 
 
+def plots_correlation_matrix(df, labels=None, absolute=False):
+    """
+    Get correlation matrix of dataframe columns
+    :param df: pandas dataframe
+    :param labels:  String[]
+                    labels of each dataframe column
+    :return: matplotlib Axes
+            Axes object with the heatmap.
+    """
+    corr = df.corr()
+
+    if labels is None:
+        labels = corr.columns.values
+
+    if absolute:
+        corr = np.absolute(corr)
+    corrmap = sns.heatmap(corr,
+                          xticklabels=labels,
+                          yticklabels=labels,
+                          center=0)
+    corrmap.set_yticklabels(corrmap.get_yticklabels(), rotation=45, fontsize=8)
+    corrmap.set_xticklabels(corrmap.get_xticklabels(), rotation=90, fontsize=8)
+    return corrmap
