@@ -53,7 +53,7 @@ class LikelihoodGenerator:
 
             cv2.destroyWindow("image")
 
-    def build_your_mask(self, file):
+    def build_your_mask(self, file=None):
         """
         Call this function to init the process of finger_regions selection.
         In the process:
@@ -87,5 +87,7 @@ class LikelihoodGenerator:
             p1 = p2
 
         mask = mask_fill_holes(mask)
+        if file is not None:
+            cv2.imwrite(file, binary2RGB(mask))
 
-        cv2.imwrite(file, binary2RGB(mask))
+        return mask
