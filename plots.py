@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -136,8 +137,54 @@ def plots_correlation_matrix(df, labels=None, absolute=False):
 
 
 def plots_segmentation(img, labels):
+    """
+    Plot the results of an image segmentation
+    Example of use:
+    >>> from skimage.segmentation import slic
+    >>> img = cv2.imread("path/to/image")
+    >>> img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    >>> segments = slic(img, n_segments=20, compactness=10, max_iter=100, sigma=2.3)
+    >>> plots_segmentation(img, segments)
+    :param img: RGB image
+    :param labels: 2D or 3D array
+                    Integer mask indicating segment labels.
+    :return:
+    """
     img_res = img.copy()
     boundaries = find_boundaries(labels).astype(np.uint)
     img_res = cv2.addWeighted(img_res, 0.7, binary2RGB(boundaries), 0.3, 0)
     plt.imshow(img_res)
+    plt.show()
+
+
+def plots_raw_data(df, columns, colors="b"):
+    """
+    Plot raw data of the given dataframe
+    :param df: DataFrame Wich contains all the data
+    :param columns: List strings name of the columns to plot
+    :param colors: color, sequence, or sequence of color, optional, default: ‘b’
+                    c can be a single color format string, or a sequence of color specifications of length N,
+                    or a sequence of N numbers to be mapped to colors using the cmap and norm specified
+                    via kwargs (see below).
+                    Note that c should not be a single numeric RGB or RGBA sequence because that is indistinguishable
+                    from an array of values to be colormapped. c can be a 2-D array in which the rows are RGB or RGBA,
+                    however, including the case of a single row to specify the same color for all points.
+    :return:
+    """
+    if len(columns) == 3:
+        projection = "3d"
+    else:
+        projection = "rectilinear"
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection=projection)
+    if projection == "3d":
+        ax.scatter(df[columns[0]], df[columns[1]], df[columns[2]], c=colors, marker='o')
+        ax.set_xlabel(columns[0])
+        ax.set_ylabel(columns[1])
+        ax.set_zlabel(columns[2])
+    else:
+        ax.scatter(df[columns[0]], df[columns[1]], c=colors, marker='o')
+        ax.set_xlabel(columns[0])
+        ax.set_ylabel(columns[1])
     plt.show()
