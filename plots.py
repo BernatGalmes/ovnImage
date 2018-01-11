@@ -3,6 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from bern_img_utils.images import binary2RGB
+
+from skimage.segmentation import find_boundaries
+
 
 def drawCircle(image, center_x, center_y, radius, color):
     """
@@ -129,3 +133,11 @@ def plots_correlation_matrix(df, labels=None, absolute=False):
     corrmap.set_yticklabels(corrmap.get_yticklabels(), rotation=45, fontsize=8)
     corrmap.set_xticklabels(corrmap.get_xticklabels(), rotation=90, fontsize=8)
     return corrmap
+
+
+def plots_segmentation(img, labels):
+    img_res = img.copy()
+    boundaries = find_boundaries(labels).astype(np.uint)
+    img_res = cv2.addWeighted(img_res, 0.7, binary2RGB(boundaries), 0.3, 0)
+    plt.imshow(img_res)
+    plt.show()

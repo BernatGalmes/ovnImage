@@ -10,6 +10,7 @@ def mask_evaluation(mask, likelihood):
     Get the evaluation metrics of a given mask and his likelihood
     :param mask: Binary image => Mask to evaluate
     :param likelihood: Binary image => Correct mask
+    :raise Incorrect likelihood
     :return: dict{
         "FN"
         "TP"
@@ -28,11 +29,9 @@ def mask_evaluation(mask, likelihood):
     P = np.count_nonzero(likelihood)  # the number of real positive cases in the data
     invert_likelihood = np.bitwise_not(likelihood)
     N = np.count_nonzero(invert_likelihood)  # the number of real negative cases in the data
-    print(str(P))
-    print(str(N))
+
     if N == 0 or P == 0:
-        print("null mask")
-        return None
+        raise Exception("Incorrect likelihood")
 
     # pixels identificats com a negatius que haurien de ser positius
     fn = np.count_nonzero(np.bitwise_and(np.bitwise_not(mask), likelihood))
@@ -93,7 +92,7 @@ def mask_sklearn_evaluation(mask, likelihood):
 
 def masks_coincidence(mask1, mask2):
     """
-    Get the porcentage of coincidence betwen two masks of the same shape
+    Get the porcentage of coincidence between two masks of the same shape
     :param mask1:
     :param mask2:
     :return:
@@ -102,7 +101,8 @@ def masks_coincidence(mask1, mask2):
     mask2 = mask2.astype(np.uint8)
 
     res = np.bitwise_and(mask1, mask2)
-    # nombre de pixels coincidents a les dues mascares
+
+    # number of coincident pixels
     equals = np.count_nonzero(res)
     n_pix1 = np.count_nonzero(mask1)
     n_pix2 = np.count_nonzero(mask2)
@@ -112,42 +112,45 @@ def masks_coincidence(mask1, mask2):
     return equals / max_pix
 
 
-def mask_onto_mask(mask1, mask2):
-    # porcentatge de coincidencia per considerar que estan a sobre
-    PORC = 0.9
+def mask_onto_mask(mask1, mask2, perc=0.9):
+    """
+    Given two masks of the same shape, check if them are one onto the other.
 
-    res = np.zeros(mask1.shape)
-    res[np.logical_and(mask1, mask2)] = 1
+    :param mask1:
+    :param mask2:
+    :param perc: percentage of coincidence pixels that must have the two masks
+                    to consider that them are one onto the other.
+    :return: bool
+    """
+    res = np.bitwise_and(mask1.astype(np.bool), mask2.astype(np.bool))
 
-    # nombre de pixels coincidents a les dues mascares
+    # number of coincident pixels
     equals = np.count_nonzero(res)
-    n_pix1 =np.count_nonzero(mask1)
+
+    n_pix1 = np.count_nonzero(mask1)
     n_pix2 = np.count_nonzero(mask2)
 
-    if equals > n_pix1 * PORC or equals > n_pix2 * PORC:
-        return True
-    else:
-        return False
+    return equals > (n_pix1 * perc) or equals > (n_pix2 * perc)
 
 
 def mask_2RGB(mask):
     """
     Convert a binary image to RGB, black & white image
-    :param image: binary image
+    :param mask: binary image
     :return: binary image coverted to RGB, true values (or 1) to BLACK and other to WHITE
     """
     mask = mask.copy()
-    img_result = mask.astype('uint8')
-    mask = np.zeros(img_result.shape).astype('uint8')
+    img_result = mask.astype(np.uint8)
+    mask = np.zeros(img_result.shape).astype(np.uint8)
 
-    res = np.zeros((img_result.shape[0], img_result.shape[1], 3)).astype('uint8')
+    res = np.zeros((img_result.shape[0], img_result.shape[1], 3), dtype=np.uint8)
     res[np.equal(img_result, mask)] = (255, 255, 255)
     return res
 
 
 def mask_fill_holes(mask):
     """
-
+    Fill all the empty pixels overwhelmed by true pixels
     :param mask: 0, 255 mask
     :return: O values inside 255 values filled with 255
     """
@@ -155,7 +158,7 @@ def mask_fill_holes(mask):
     # Set values equal to or above 220 to 0.
     # Set values below 220 to 255.
     mask = np.bitwise_not(mask.copy())
-    th, im_th = cv2.threshold(mask, 220, 255, cv2.THRESH_BINARY_INV)
+    th, im_th = cv2.threshold(mask, 1, 255, cv2.THRESH_BINARY_INV)
 
     # Copy the thresholded image.
     im_floodfill = im_th.copy()
@@ -200,46 +203,26 @@ def mask_bounding_circle(mask):
     :param mask:
     :return: (x, y), r => integers
     """
-    _, th = cv2.threshold(mask.copy(), 127, 255, cv2.THRESH_BINARY_INV)
+    _, th = cv2.threshold(mask.copy(), 1, 255, cv2.THRESH_BINARY_INV)
     _, contours, _ = cv2.findContours(th.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     cnt = contours[0]
 
     (x, y), radius = cv2.minEnclosingCircle(cnt)
     center = (int(x), int(y))
     radius = int(radius)
-    # cv2.circle(image, center, radius, (0, 255, 255), 8)
-
     return center, radius
 
 
-def max_contour(mask):
+def mask_delete_contour_in(mask, region):  # TODO: comment function
     """
-    Get the contour with the biggest area of a mask
+
     :param mask:
-    :return: contour, tuple => the contour found and his center
+    :param region:
+    :return:
     """
-    fmask = mask.astype(np.uint8)
-    _, contours, _ = cv2.findContours(fmask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    mask = mask.astype(np.uint8)
 
-    maxContour = 0
-    for contour in contours:
-        contourSize = cv2.contourArea(contour)
-        if contourSize > maxContour:
-            maxContour = contourSize
-            maxContourData = contour
-
-    M = cv2.moments(maxContourData)
-    cx = int(M['m10'] / M['m00'])
-    cy = int(M['m01'] / M['m00'])
-
-    return maxContourData, (cx, cy)
-
-
-def mask_delete_contour_in(mask, region):
-
-    fmask = mask.astype(np.uint8)
-
-    _, contours, _ = cv2.findContours(fmask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, _ = cv2.findContours(mask.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     for contour in contours:
 
@@ -290,32 +273,25 @@ def mask_build_circular_boolean(image, circle):
 
     return np.asarray(mask, dtype=np.bool)
 
+
 def mask_biggest_connected_component(mask):
     """
-    returns the bigger connected component of finger mask
-    :param f_mask:
+    Get the biggest connected component of a mask
+    :param mask:
     :return:
     """
-    mask = mask.astype(np.uint8)
-
-    f_m_binary = mask.copy()
-    f_m_binary[f_m_binary != 0] = 255
-    f_m_binary = f_m_binary.copy()
+    f_m_binary = mask.copy().astype(np.uint8)
+    f_m_binary[f_m_binary != 0] = np.iinfo(np.uint8).max
 
     # Find the largest contour and extract it
     im, contours, hierarchy = cv2.findContours(f_m_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     if len(contours) == 0:
-        return mask  # TODO: informar al programa principal
+        return mask
 
-    maxContour = 0
-    for contour in contours:
-        contourSize = cv2.contourArea(contour)
-        if contourSize > maxContour:
-            maxContour = contourSize
-            maxContourData = contour
+    biggest_cnt = max(contours, key=cv2.contourArea)
 
     # Create a mask from the largest contour
     mask = np.zeros_like(f_m_binary)
-    cv2.fillPoly(mask, [maxContourData], 1)
+    cv2.fillPoly(mask, [biggest_cnt], 1)
 
     return mask

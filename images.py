@@ -8,7 +8,7 @@ def binary2RGB(image):
     :param image: binary image
     :return: binary image coverted to RGB, true values (or 1) to BLACK and other to WHITE
     """
-    img = image.astype('uint8')
+    img = image.astype(np.uint8)
     mask = np.zeros(img.shape, dtype=np.uint8)
 
     res = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
