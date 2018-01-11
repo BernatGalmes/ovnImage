@@ -107,7 +107,7 @@ def masks_coincidence(mask1, mask2):
     n_pix1 = np.count_nonzero(mask1)
     n_pix2 = np.count_nonzero(mask2)
 
-    max_pix = np.min([n_pix1, n_pix2])
+    max_pix = np.max([n_pix1, n_pix2])
 
     return equals / max_pix
 
@@ -157,8 +157,13 @@ def mask_fill_holes(mask):
     # Threshold.
     # Set values equal to or above 220 to 0.
     # Set values below 220 to 255.
-    mask = np.bitwise_not(mask.copy())
-    th, im_th = cv2.threshold(mask, 1, 255, cv2.THRESH_BINARY_INV)
+    mask = mask.copy()
+    # mask = cv2.bitwise_not(mask)
+    if mask.max() == 1:
+        im_th = mask * 255
+
+    else:
+        th, im_th = cv2.threshold(mask, 220, 255, cv2.THRESH_BINARY_INV)
 
     # Copy the thresholded image.
     im_floodfill = im_th.copy()
@@ -177,7 +182,10 @@ def mask_fill_holes(mask):
     # Combine the two images to get the foreground.
     im_out = im_th | im_floodfill_inv
 
-    return im_out
+    if mask.max() == 1:
+        im_out = im_out / 255
+
+    return im_out.astype(np.uint8)
 
 
 def mask_from_RGB_file(file_mask):
@@ -240,7 +248,7 @@ def mask_delete_contour_in(mask, region):  # TODO: comment function
 
 def mask_build_circular(image, circle):
     """
-    build a circular mask onto the image
+    Build a circular mask onto the image
     :param image: 3 channels image
     :param circle: (int,int, int)
         tuple with the circle to find, two first values are circle coordinates (x, y), the thirth is the radius
@@ -280,18 +288,18 @@ def mask_biggest_connected_component(mask):
     :param mask:
     :return:
     """
-    f_m_binary = mask.copy().astype(np.uint8)
-    f_m_binary[f_m_binary != 0] = np.iinfo(np.uint8).max
+    mask = mask.copy().astype(np.uint8)
+    mask[mask != 0] = np.iinfo(np.uint8).max
 
     # Find the largest contour and extract it
-    im, contours, hierarchy = cv2.findContours(f_m_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    im, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     if len(contours) == 0:
         return mask
 
     biggest_cnt = max(contours, key=cv2.contourArea)
 
     # Create a mask from the largest contour
-    mask = np.zeros_like(f_m_binary)
+    mask = np.zeros_like(mask)
     cv2.fillPoly(mask, [biggest_cnt], 1)
 
     return mask
