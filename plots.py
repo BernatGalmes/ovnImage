@@ -9,61 +9,6 @@ from bern_img_utils.images import binary2RGB
 from skimage.segmentation import find_boundaries
 
 
-def drawCircle(image, center_x, center_y, radius, color):
-    """
-    Draw a circle onto the image
-    :param image: image
-        where to draw
-    :param center_x: int
-        x position of the circle
-    :param center_y: int
-        y position of the circle
-    :param radius: int
-        radius of the circle
-    :param color: Tuple
-        rgb color to draw the circle perimeter
-    :return:
-    """
-    cv2.circle(image, center=(center_x, center_y), radius=radius, color=color, thickness=4)
-    cv2.rectangle(image, pt1=(center_x - 5, center_y - 5), pt2=(center_x + 5, center_y + 5), color=(0, 0, 255),
-                  thickness=cv2.FILLED)
-
-
-def drawCircles(image, circles, mark_circle):
-    """
-    Draw multiple circles onto the image of red color. And draw the 'mark_circle' whith green color
-    :param image: rgb image
-    :param circles: Circle[]
-                    Circle => Tuple(center_x, center_y, radius)
-    :param mark_circle: Circle circle to remark
-                        Circle => Tuple(center_x, center_y, radius)
-    :return:
-    """
-    for center_x, center_y, radius in circles:
-        drawCircle(image, center_x, center_y, radius, (220, 20, 20))
-    drawCircle(image, mark_circle.cx, mark_circle.cy, mark_circle.r, (10, 255, 20))
-    return image
-
-
-def plotimg(image, filename=None, title=''):
-    """
-    Plot a single image in x window or on a file as a figure.
-
-    :param image:
-    :param filename:
-    :param title:
-    :return:
-    """
-    plt.title(title)
-    plt.imshow(image)
-
-    if filename is not None:
-        plt.savefig(filename, bbox_inches='tight')
-    else:
-        plt.show()
-    plt.close()
-
-
 def multiplot(images, filename=None, nrows=2, colorbar=False):
     """
     Help to plot a multiple image figure
