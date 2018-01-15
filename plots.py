@@ -133,3 +133,39 @@ def plots_raw_data(df, columns, colors="b"):
         ax.set_xlabel(columns[0])
         ax.set_ylabel(columns[1])
     plt.show()
+
+
+# TODO: not tryed
+def biplot(pca, dat):
+    """
+    Plot a data biplot on the screen
+    :param dat: DataFrame data to plot
+    :return:
+    """
+    print("computing biplot ...")
+    # 0,1 denote PC1 and PC2; change values for other PCs
+    xvector = pca.components_[0]  # see 'prcomp(my_data)$rotation' in R
+    yvector = pca.components_[1]
+
+    xs = pca.transform(dat)[:, 0]  # see 'prcomp(my_data)$x' in R
+    ys = pca.transform(dat)[:, 1]
+
+    # visualize projections
+
+    # Note: scale values for arrows and text are a bit inelegant as of now,
+    #       so feel free to play around with them
+
+    # plt.figure(1)
+    for i in range(len(xs)):
+        # circles project documents (ie rows from csv) as points onto PC axes
+        plt.plot(xs[i], ys[i], 'b,')
+        # plt.text(xs[i] * 1.2, ys[i] * 1.2, list(dat.index)[i], color='b')
+
+    for i in range(len(xvector)):
+        # arrows project features (ie columns from csv) as vectors onto PC axes
+        plt.arrow(0, 0, xvector[i] * max(xs), yvector[i] * max(ys),
+                  color='r', width=0.0005, head_width=0.0025)
+        plt.text(xvector[i] * max(xs) * 1.2, yvector[i] * max(ys) * 1.2,
+                 list(dat.columns.values)[i], color='r')
+
+    plt.show()
