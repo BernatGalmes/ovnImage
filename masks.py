@@ -90,9 +90,10 @@ def mask_sklearn_evaluation(mask, likelihood):
     return stats
 
 
-def masks_coincidence(mask1, mask2):
+def masks_coincidence(mask1, mask2, priority="big_mask"):
     """
     Get the porcentage of coincidence between two masks of the same shape
+    :param priority:
     :param mask1:
     :param mask2:
     :return:
@@ -107,7 +108,10 @@ def masks_coincidence(mask1, mask2):
     n_pix1 = np.count_nonzero(mask1)
     n_pix2 = np.count_nonzero(mask2)
 
-    max_pix = np.max([n_pix1, n_pix2])
+    if priority == "small_mask":
+        max_pix = np.min([n_pix1, n_pix2])
+    else:
+        max_pix = np.max([n_pix1, n_pix2])
 
     return equals / max_pix
 
