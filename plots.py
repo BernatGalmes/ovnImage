@@ -9,61 +9,6 @@ from bern_img_utils.images import binary2RGB
 from skimage.segmentation import find_boundaries
 
 
-def drawCircle(image, center_x, center_y, radius, color):
-    """
-    Draw a circle onto the image
-    :param image: image
-        where to draw
-    :param center_x: int
-        x position of the circle
-    :param center_y: int
-        y position of the circle
-    :param radius: int
-        radius of the circle
-    :param color: Tuple
-        rgb color to draw the circle perimeter
-    :return:
-    """
-    cv2.circle(image, center=(center_x, center_y), radius=radius, color=color, thickness=4)
-    cv2.rectangle(image, pt1=(center_x - 5, center_y - 5), pt2=(center_x + 5, center_y + 5), color=(0, 0, 255),
-                  thickness=cv2.FILLED)
-
-
-def drawCircles(image, circles, mark_circle):
-    """
-    Draw multiple circles onto the image of red color. And draw the 'mark_circle' whith green color
-    :param image: rgb image
-    :param circles: Circle[]
-                    Circle => Tuple(center_x, center_y, radius)
-    :param mark_circle: Circle circle to remark
-                        Circle => Tuple(center_x, center_y, radius)
-    :return:
-    """
-    for center_x, center_y, radius in circles:
-        drawCircle(image, center_x, center_y, radius, (220, 20, 20))
-    drawCircle(image, mark_circle.cx, mark_circle.cy, mark_circle.r, (10, 255, 20))
-    return image
-
-
-def plotimg(image, filename=None, title=''):
-    """
-    Plot a single image in x window or on a file as a figure.
-
-    :param image:
-    :param filename:
-    :param title:
-    :return:
-    """
-    plt.title(title)
-    plt.imshow(image)
-
-    if filename is not None:
-        plt.savefig(filename, bbox_inches='tight')
-    else:
-        plt.show()
-    plt.close()
-
-
 def multiplot(images, filename=None, nrows=2, colorbar=False):
     """
     Help to plot a multiple image figure
@@ -187,4 +132,40 @@ def plots_raw_data(df, columns, colors="b"):
         ax.scatter(df[columns[0]], df[columns[1]], c=colors, marker='o')
         ax.set_xlabel(columns[0])
         ax.set_ylabel(columns[1])
+    plt.show()
+
+
+# TODO: not tryed
+def biplot(pca, dat):
+    """
+    Plot a data biplot on the screen
+    :param dat: DataFrame data to plot
+    :return:
+    """
+    print("computing biplot ...")
+    # 0,1 denote PC1 and PC2; change values for other PCs
+    xvector = pca.components_[0]  # see 'prcomp(my_data)$rotation' in R
+    yvector = pca.components_[1]
+
+    xs = pca.transform(dat)[:, 0]  # see 'prcomp(my_data)$x' in R
+    ys = pca.transform(dat)[:, 1]
+
+    # visualize projections
+
+    # Note: scale values for arrows and text are a bit inelegant as of now,
+    #       so feel free to play around with them
+
+    # plt.figure(1)
+    for i in range(len(xs)):
+        # circles project documents (ie rows from csv) as points onto PC axes
+        plt.plot(xs[i], ys[i], 'b,')
+        # plt.text(xs[i] * 1.2, ys[i] * 1.2, list(dat.index)[i], color='b')
+
+    for i in range(len(xvector)):
+        # arrows project features (ie columns from csv) as vectors onto PC axes
+        plt.arrow(0, 0, xvector[i] * max(xs), yvector[i] * max(ys),
+                  color='r', width=0.0005, head_width=0.0025)
+        plt.text(xvector[i] * max(xs) * 1.2, yvector[i] * max(ys) * 1.2,
+                 list(dat.columns.values)[i], color='r')
+
     plt.show()
