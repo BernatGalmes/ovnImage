@@ -52,17 +52,25 @@ class MasksTestCase(unittest.TestCase):
     #     self.assertEqual(True, False)
 
     def test_fill_holes(self):
-        mask = self.likelihood.copy()
-        _, contours, _ = cv2.findContours(mask.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        mask_ones = self.likelihood.copy()
+        _, contours, _ = cv2.findContours(mask_ones.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
         for cnt in contours:
             area = cv2.contourArea(cnt)
             if area > 100:
                 M = cv2.moments(cnt)
                 cx = int(M['m10'] / M['m00'])
                 cy = int(M['m01'] / M['m00'])
-                cv2.circle(mask, center=(cx, cy), radius=2, color=0)
+                cv2.circle(mask_ones, center=(cx, cy), radius=2, color=0)
 
-        mask = mask_fill_holes(mask)
+        mask_ones_save = mask_ones.copy()
+        mask = mask_fill_holes(mask_ones)
+        self.assertEqual(masks_coincidence(self.likelihood, mask) > 0.99, True)
+
+        # mask ones must not be modified
+        self.assertEqual(masks_coincidence(mask_ones, mask_ones_save) > 0.99, True)
+
+        mask_255 = mask_ones * 255
+        mask = mask_fill_holes(mask_255)
         self.assertEqual(masks_coincidence(self.likelihood, mask) > 0.99, True)
 
     def test_from_RGB_file(self):
