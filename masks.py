@@ -174,6 +174,7 @@ def mask_fill_holes(mask):
         im_th = mask * 255
 
     else:
+        mask = cv2.bitwise_not(mask)
         th, im_th = cv2.threshold(mask, 220, 255, cv2.THRESH_BINARY_INV)
 
     # Copy the thresholded image.

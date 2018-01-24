@@ -86,8 +86,11 @@ class LikelihoodGenerator:
             cv2.line(mask, p1, p2, 255, 1)
             p1 = p2
 
+        mask *= 255
         mask = mask_fill_holes(mask)
         if file is not None:
+            print("Writting file to: " + str(file))
+            # TODO: check if folder exists, if not create dir
             cv2.imwrite(file, binary2RGB(mask))
 
         return mask
