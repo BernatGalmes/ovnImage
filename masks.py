@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import os
 
-from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, accuracy_score
+import sklearn.metrics as metrics
 
 
 def mask_evaluation(mask, likelihood):
@@ -44,24 +44,22 @@ def mask_evaluation(mask, likelihood):
 
     tn = N - fp
 
-    stats["FN"] = fn / P
-    stats["TP"] = tp / P
-    stats["FP"] = fp / N
+    stats["FNR"] = fn / P
+    stats["FPR"] = fp / N
 
-    if stats["TP"] != 0 or stats["FN"] != 0:
-        stats["Recall"] = stats["TP"] / (stats["TP"] + stats["FN"])
-    else:
-        stats["Recall"] = 0
+    stats["TPR"] = tp / P
+    stats["TNR"] = tn / N
 
-    if stats["TP"] != 0 or stats["FP"] != 0:
-        stats["Precision"] = stats["TP"] / (stats["TP"] + stats["FP"])
+    if stats["TPR"] != 0 or stats["FPR"] != 0:
+        stats["Precision"] = tp / (tp+fp)
     else:
         stats["Precision"] = 0
 
     if stats["Precision"] != 0 or stats["Recall"] != 0:
-        stats["F1"] = (2 * stats["Precision"] * stats["Recall"]) / (stats["Precision"] + stats["Recall"])
+        stats["F1"] = (2 * stats["Precision"] * stats["TPR"]) / (stats["Precision"] + stats["TPR"])
         stats["accuracy"] = (tp + tn) / (P + N)
-        stats["cohen_kappa"] = cohen_kappa_score(likelihood.flatten(), mask.flatten())
+        stats["cohen_kappa"] = metrics.cohen_kappa_score(likelihood.flatten(), mask.flatten())
+
 
     return stats
 
@@ -76,17 +74,26 @@ def mask_sklearn_evaluation(mask, likelihood):
     y_true = likelihood.flatten()
     y_pred = mask.flatten()
 
-    metrics = precision_recall_fscore_support(y_true, y_pred, average="micro")
+    tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
+
+    N = tn + fp
+    P = fn+tp
+
+    prfs = metrics.precision_recall_fscore_support(y_true, y_pred, pos_label=255, average="binary")
 
     stats = {
-        "Precision": metrics[0],
-        "Recall": metrics[1],
-        "Fbeta": metrics[2],
-        "cohen_kappa": cohen_kappa_score(y_true, y_pred),
-        "accuracy": accuracy_score(y_true, y_pred)
+        "Precision": tp/(tp+fp),
+        "TPR": prfs[1],
+        "TNR": tn/N,
+        "FPR": fp/N,
+        "FNR": fn/P,
+        "Fbeta": prfs[2],
+        "cohen_kappa": metrics.cohen_kappa_score(y_true, y_pred),
+        "accuracy": (tp+tn)/(P+N),
+        "r2": metrics.r2_score(y_true, y_pred)
     }
 
-    stats["F1"] = (2 * stats["Precision"] * stats["Recall"]) / (stats["Precision"] + stats["Recall"])
+    stats["F1"] = (2 * stats["Precision"] * stats["TPR"]) / (stats["Precision"] + stats["TPR"])
     return stats
 
 
