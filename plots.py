@@ -9,7 +9,7 @@ from bern_img_utils.images import binary2RGB
 from skimage.segmentation import find_boundaries
 
 
-def multiplot(images, filename=None, nrows=2, colorbar=False):
+def multiplot(images, filename=None, nrows=2, colorbar=False, cmap='Greys'):
     """
     Help to plot a multiple image figure
     :param images: list of dictionaries with structure:
@@ -44,7 +44,7 @@ def multiplot(images, filename=None, nrows=2, colorbar=False):
         plt.subplot(rows, columns, i + 1)
         plt.title(title)
         plt.axis('off')
-        plt.imshow(image, cmap='Greys')
+        plt.imshow(image, cmap=cmap)
         if colorbar:
             plt.colorbar()
 

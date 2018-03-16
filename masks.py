@@ -55,7 +55,7 @@ def mask_evaluation(mask, likelihood):
     else:
         stats["Precision"] = 0
 
-    if stats["Precision"] != 0 or stats["Recall"] != 0:
+    if stats["Precision"] != 0 or stats["TPR"] != 0:
         stats["F1"] = (2 * stats["Precision"] * stats["TPR"]) / (stats["Precision"] + stats["TPR"])
         stats["accuracy"] = (tp + tn) / (P + N)
         stats["cohen_kappa"] = metrics.cohen_kappa_score(likelihood.flatten(), mask.flatten())
@@ -64,7 +64,7 @@ def mask_evaluation(mask, likelihood):
     return stats
 
 
-def mask_sklearn_evaluation(mask, likelihood):
+def mask_sklearn_evaluation(mask, likelihood, pos_label=255):
     """
     Same than mask_evaluation, but using sklearn library for compute values
     :param mask:
@@ -77,9 +77,9 @@ def mask_sklearn_evaluation(mask, likelihood):
     tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
 
     N = tn + fp
-    P = fn+tp
+    P = fn + tp
 
-    prfs = metrics.precision_recall_fscore_support(y_true, y_pred, pos_label=255, average="binary")
+    prfs = metrics.precision_recall_fscore_support(y_true, y_pred, pos_label=pos_label, average="binary")
 
     stats = {
         "Precision": tp/(tp+fp),
@@ -90,10 +90,10 @@ def mask_sklearn_evaluation(mask, likelihood):
         "Fbeta": prfs[2],
         "cohen_kappa": metrics.cohen_kappa_score(y_true, y_pred),
         "accuracy": (tp+tn)/(P+N),
-        "r2": metrics.r2_score(y_true, y_pred)
+        "r2": metrics.r2_score(y_true, y_pred),
+        "F1": metrics.f1_score(y_true, y_pred, pos_label=pos_label)
     }
 
-    stats["F1"] = (2 * stats["Precision"] * stats["TPR"]) / (stats["Precision"] + stats["TPR"])
     return stats
 
 
