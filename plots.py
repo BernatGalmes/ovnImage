@@ -56,7 +56,7 @@ def multiplot(images, filename=None, nrows=2, colorbar=False, cmap='Greys'):
     plt.close()
 
 
-def plots_correlation_matrix(df, labels=None, absolute=False):
+def plots_correlation_matrix(df, labels=None, absolute=False, method='pearson'):
     """
     Get correlation matrix of dataframe columns
     :param df: pandas dataframe
@@ -65,7 +65,7 @@ def plots_correlation_matrix(df, labels=None, absolute=False):
     :return: matplotlib Axes
             Axes object with the heatmap.
     """
-    corr = df.corr()
+    corr = df.corr(method=method)
 
     if labels is None:
         labels = corr.columns.values
