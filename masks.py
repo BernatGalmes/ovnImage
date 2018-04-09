@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import os
+import copy
 
 import sklearn.metrics as metrics
 
@@ -51,7 +52,7 @@ def mask_evaluation(mask, likelihood):
     stats["TNR"] = tn / N
 
     if stats["TPR"] != 0 or stats["FPR"] != 0:
-        stats["Precision"] = tp / (tp+fp)
+        stats["Precision"] = tp / (tp + fp)
     else:
         stats["Precision"] = 0
 
@@ -59,7 +60,6 @@ def mask_evaluation(mask, likelihood):
         stats["F1"] = (2 * stats["Precision"] * stats["TPR"]) / (stats["Precision"] + stats["TPR"])
         stats["accuracy"] = (tp + tn) / (P + N)
         stats["cohen_kappa"] = metrics.cohen_kappa_score(likelihood.flatten(), mask.flatten())
-
 
     return stats
 
@@ -82,14 +82,14 @@ def mask_sklearn_evaluation(mask, likelihood, pos_label=255):
     prfs = metrics.precision_recall_fscore_support(y_true, y_pred, pos_label=pos_label, average="binary")
 
     stats = {
-        "Precision": tp/(tp+fp),
+        "Precision": tp / (tp + fp),
         "TPR": prfs[1],
-        "TNR": tn/N,
-        "FPR": fp/N,
-        "FNR": fn/P,
+        "TNR": tn / N,
+        "FPR": fp / N,
+        "FNR": fn / P,
         "Fbeta": prfs[2],
         "cohen_kappa": metrics.cohen_kappa_score(y_true, y_pred),
-        "accuracy": (tp+tn)/(P+N),
+        "accuracy": (tp + tn) / (P + N),
         "r2": metrics.r2_score(y_true, y_pred),
         "F1": metrics.f1_score(y_true, y_pred, pos_label=pos_label)
     }
@@ -315,3 +315,40 @@ def mask_biggest_connected_component(mask):
     cv2.fillPoly(mask, [biggest_cnt], 1)
 
     return mask
+
+
+def mask_every_separated(masks):
+    """
+    Get an image of every component in the mask with different color
+    :param masks:
+    :return:
+    """
+    masks = masks.copy().astype(np.uint8)
+    masks[masks != 0] = np.iinfo(np.uint8).max
+    # Find the largest contour and extract it
+    _, contours, _ = cv2.findContours(masks, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    multi_mask = np.zeros_like(masks)
+    color = 1
+    for cnt in contours:
+        cv2.fillPoly(multi_mask, [cnt], color)
+        color = color + 1
+
+    return multi_mask
+
+
+def mask_2BOOL(mask):
+    """
+    Convert mask to false true value
+
+    TODO: check if numpy astype(bool) make the same
+    :param mask:
+    :return:
+    """
+
+    img_cp = copy.copy(mask)
+
+    img_cp[mask == 0] = False
+    img_cp[mask != 0] = True
+
+    return img_cp
