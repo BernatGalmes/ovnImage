@@ -28,9 +28,9 @@ def multiplot(images, filename=None, nrows=2, cmap='Greys'):
     rows = nrows
 
     if (n_img % 2) == 0:
-        columns = int(n_img / rows) + 1
+        columns = int(n_img / rows)
     else:
-        columns = int((n_img / rows) + 1) + 1
+        columns = int((n_img / rows) + 1)
 
     for i in range(0, n_img):
         img = images[i]
