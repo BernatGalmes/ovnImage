@@ -7,9 +7,10 @@ import seaborn as sns
 from bern_img_utils.images import binary2RGB
 
 from skimage.segmentation import find_boundaries
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
-def multiplot(images, filename=None, nrows=2, colorbar=False, cmap='Greys'):
+def multiplot(images, filename=None, nrows=2, cmap='Greys'):
     """
     Help to plot a multiple image figure
     :param images: list of dictionaries with structure:
@@ -20,20 +21,16 @@ def multiplot(images, filename=None, nrows=2, colorbar=False, cmap='Greys'):
     :param filename: String|None
                         Path file Where save the figure,
                         None to plot in a window
-    :param colorbar: bool
-                        true to plot a colorbar near each image
     :return:
     """
-
+    plt.clf()
     n_img = len(images)
     rows = nrows
 
     if (n_img % 2) == 0:
-        columns = int(n_img / rows) + 1
+        columns = int(n_img / rows)
     else:
-        columns = int((n_img / rows) + 1) + 1
-
-    plt.figure(figsize=(20, 14))
+        columns = int((n_img / rows) + 1)
 
     for i in range(0, n_img):
         img = images[i]
@@ -41,20 +38,24 @@ def multiplot(images, filename=None, nrows=2, colorbar=False, cmap='Greys'):
         image = img['img']
         title = img['title']
 
-        plt.subplot(rows, columns, i + 1)
-        plt.title(title)
-        plt.axis('off')
-        plt.imshow(image, cmap=cmap)
-        if colorbar:
-            plt.colorbar()
+        ax = plt.subplot(rows, columns, i + 1)
+        ax.set_title(title)
+        ax.axis('off')
+        if 'cmap' in img:
+            imshow = ax.imshow(image, cmap=img['cmap'])
+
+        else:
+            imshow = ax.imshow(image, cmap=cmap)
+
+        if 'colorbar' in img:
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes('right', size='5%', pad=0.05)
+            plt.colorbar(imshow, cax=cax, orientation='vertical')
 
     if filename:
         plt.savefig(filename, bbox_inches='tight')
     else:
         plt.show()
-
-    plt.close()
-
 
 def plots_correlation_matrix(df, labels=None, absolute=False, method='pearson'):
     """
