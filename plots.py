@@ -41,7 +41,12 @@ def multiplot(images, filename=None, nrows=2, cmap='Greys'):
         ax = plt.subplot(rows, columns, i + 1)
         ax.set_title(title)
         ax.axis('off')
-        imshow = ax.imshow(image, cmap=cmap)
+        if 'cmap' in img:
+            imshow = ax.imshow(image, cmap=img['cmap'])
+
+        else:
+            imshow = ax.imshow(image, cmap=cmap)
+
         if 'colorbar' in img:
             divider = make_axes_locatable(ax)
             cax = divider.append_axes('right', size='5%', pad=0.05)
