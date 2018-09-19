@@ -1,6 +1,6 @@
 import cv2
-from bern_img_utils.images import *
-from bern_img_utils.masks import mask_fill_holes
+from ovnimage.images import *
+from ovnimage.masks import mask_fill_holes
 
 
 class LikelihoodGenerator:

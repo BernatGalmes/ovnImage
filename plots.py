@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from bern_img_utils.images import binary2RGB
+from ovnimage.images import binary2RGB
 
 from skimage.segmentation import find_boundaries
 from mpl_toolkits.axes_grid1 import make_axes_locatable
