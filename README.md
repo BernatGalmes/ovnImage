@@ -1,4 +1,4 @@
-# bern_img_utils
+# Ovnimage
 Useful helper functions of image processing and machine learning
 
 ## Libraries
