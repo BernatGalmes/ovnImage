@@ -1,6 +1,6 @@
 import unittest
 import cv2
-from bern_img_utils.masks import *
+from ..masks import *
 
 
 class MasksTestCase(unittest.TestCase):
