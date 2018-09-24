@@ -25,3 +25,31 @@ def grays2binary(image_grays):
     results = np.zeros(image_grays.shape)
     results[np.not_equal(image_grays, results)] = 1
     return results
+
+
+def reduce_image(img, size):
+    """
+    Resize the image without deformation
+    :param img:
+    :param size: Tuple (witdh, height)
+    :return:
+    """
+
+    witdh, height = size
+    back = np.full((witdh, height), 255)
+    shap = img.shape
+
+    if shap[0] > shap[1]:
+        r_height = witdh
+        r_width = int((witdh / shap[0]) * shap[1])
+    else:
+        r_height = int((height / shap[1]) * shap[0])
+        r_width = height
+
+    aux = cv2.resize(img, (r_width, r_height))
+
+    w_off = int((back.shape[0] - aux.shape[0]) / 2)
+    h_off = int((back.shape[1] - aux.shape[1]) / 2)
+    back[w_off:aux.shape[0] + w_off, h_off:aux.shape[1] + h_off] = aux
+
+    return back
