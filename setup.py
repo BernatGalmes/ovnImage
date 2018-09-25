@@ -2,10 +2,10 @@ from setuptools import setup
 
 setup(name='ovnImage',
       version='0.1',
-      description='Functions for pca',
+      description='Useful helper functions of image processing and machine learning',
       url='',
-      author='UIB-UGIVIA',
-      author_email=['miquelca32@gmail.com', 'bernat_galmes@hotmail.com', 'gabriel_moya@uib.es'],
+      author="Miquel Miró Nicolau, Bernat Galmés Rubert, Dr. Gabriel Moyà Alcover",
+      author_email='miquelca32@gmail.com, bernat_galmes@hotmail.com, gabriel_moya@uib.es',
       license='MIT',
       packages=['ovnImage'],
       install_requires=[

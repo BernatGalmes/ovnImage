@@ -5,3 +5,4 @@ from .functions import *
 from .LikelihoodGenerator import *
 from .plots import *
 from .images import *
+from .decorators import *
