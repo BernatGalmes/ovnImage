@@ -29,7 +29,7 @@ class InteractivePlot:
         self.fig.canvas.set_window_title('Interaction figure')
         self.colorbars = []
 
-    def _multiplot(self, images, nrows=2, cmap='Greys'):
+    def _multiplot(self, images, cmap='Greys'):
         """
         Help to plot a multiple image figure
         :param images: list of dictionaries with structure:
@@ -70,7 +70,6 @@ class InteractivePlot:
                     cb.remove()
                 divider = make_axes_locatable(ax)
                 cax = divider.append_axes('right', size='5%', pad=0.05)
-                # cax.clear()
                 cb = self.fig.colorbar(imshow, cax=cax, orientation='vertical')
                 self.colorbars.append(cb)
 
@@ -78,17 +77,17 @@ class InteractivePlot:
         self.authomatic = value
         self.interval = time
 
-    def multi(self, images, nrows=2, cmap="Greys"):
+    def multi(self, images, cmap="Greys"):
         if len(images) > len(self.axes):
             self.__create_figure(self.n_img)
 
-        self._multiplot(images, nrows, cmap)
+        self._multiplot(images, cmap)
         if self.authomatic:
             self.fig.canvas.start_event_loop(self.interval)
         else:
             while not self.fig.waitforbuttonpress(0):
                 pass
 
-    def save_multiplot(self, filename, images, nrows=2, cmap="Greys"):
-        self._multiplot(images, nrows, cmap)
+    def save_multiplot(self, filename, images, cmap="Greys"):
+        self._multiplot(images, cmap)
         plt.savefig(filename, bbox_inches='tight')

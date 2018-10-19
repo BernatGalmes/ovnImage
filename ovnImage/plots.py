@@ -25,20 +25,17 @@ def multiplot(images, filename=None, nrows=2, cmap='Greys'):
     """
     plt.clf()
     n_img = len(images)
-    rows = nrows
 
     if (n_img % 2) == 0:
-        columns = int(n_img / rows)
+        columns = int(n_img / nrows)
     else:
-        columns = int((n_img / rows) + 1)
+        columns = int((n_img / nrows) + 1)
 
-    for i in range(0, n_img):
-        img = images[i]
-
+    for i, img in enumerate(images):
         image = img['img']
         title = img['title']
 
-        ax = plt.subplot(rows, columns, i + 1)
+        ax = plt.subplot(nrows, columns, i + 1)
         ax.set_title(title)
         ax.axis('off')
         if 'cmap' in img:
@@ -56,6 +53,7 @@ def multiplot(images, filename=None, nrows=2, cmap='Greys'):
         plt.savefig(filename, bbox_inches='tight')
     else:
         plt.show()
+
 
 def plots_correlation_matrix(df, labels=None, absolute=False, method='pearson'):
     """
