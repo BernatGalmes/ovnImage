@@ -1,3 +1,6 @@
+"""
+Useful functions to easily create new plots
+"""
 import cv2
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D

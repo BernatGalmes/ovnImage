@@ -1,14 +1,21 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+
 class MultiPlot:
+    """
+    Class to help to plot a set of images or plots in a unique figure.
+
+    """
 
     FIGSIZE = (15, 15)
 
     def __init__(self, n_img=5):
-        self.authomatic = False
-        self.interval = 1
+        """
+        Init the object with the number of images/plots that must contain each Figure.
 
+        :param n_img: Number of images/plots of the figures
+        """
         self.colorbars = []
         self.n_img = n_img
         if n_img == 1:
@@ -20,6 +27,15 @@ class MultiPlot:
             raise Exception("Bad number of images")
 
     def __create_figure(self, keep_unused_axes=False):
+        """
+        Internal function that build the Figure that are going to contain
+        all the plots
+
+        :param keep_unused_axes: Specify if the axes of the subplots must be keep
+        :type keep_unused_axes: bool
+
+        :return:
+        """
         nrows = 2
         if (self.n_img % 2) == 0:
             columns = int(self.n_img / nrows)
@@ -45,9 +61,8 @@ class MultiPlot:
             "colorbar": show colorbar to the image
             "cmap": image matplotlib colormap --> https://matplotlib.org/examples/color/colormaps_reference.html
             }
-        :param filename: String|None
-                            Path file Where save the figure,
-                            None to plot in a window
+        :param cmap: Default color map to use in all subplots
+
         :return:
         """
         for cb in self.colorbars:
@@ -76,18 +91,46 @@ class MultiPlot:
                 divider = make_axes_locatable(ax)
                 cax = divider.append_axes('right', size='5%', pad=0.05)
                 cb = self.fig.colorbar(imshow, cax=cax, orientation='vertical')
-                self.colorbars.append(cb)
-
-    def set_authomatic_loop(self, value, time):
-        self.authomatic = value
-        self.interval = time
 
     def multi(self, images, cmap="Greys"):
+        """
+        Plot a multiple image figure in a window.
+
+        :param images: list of dictionaries with structure:
+            {
+            "img": image to plot,
+            "title": name of the plot,
+            "colorbar": show colorbar to the image
+            "cmap": image matplotlib colormap --> https://matplotlib.org/examples/color/colormaps_reference.html
+            }
+        :param cmap: Default color map to use in all subplots
+
+        :return:
+        """
         if len(images) > len(self.axes):
             self.__create_figure()
 
         self._multiplot(images, cmap)
 
     def save_multiplot(self, filename, images, cmap="Greys"):
+        """
+        Plot a multiple image figure in a file.
+
+        :param filename: String|None
+                            Path file Where save the figure,
+                            None to plot in a window
+
+        :param images: list of dictionaries with structure:
+            {
+            "img": image to plot,
+            "title": name of the plot,
+            "colorbar": show colorbar to the image
+            "cmap": image matplotlib colormap --> https://matplotlib.org/examples/color/colormaps_reference.html
+            }
+
+        :param cmap: Default color map to use in all subplots
+
+        :return:
+        """
         self._multiplot(images, cmap)
         plt.savefig(filename, bbox_inches='tight')
