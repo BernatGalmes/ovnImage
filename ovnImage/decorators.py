@@ -1,7 +1,6 @@
 import warnings
 
 
-# TODO: Move this function to an appropiate place
 def deprecated(func):
     """
 

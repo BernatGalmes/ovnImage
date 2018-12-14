@@ -1,33 +1,39 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+class MultiPlot:
 
-class InteractivePlot:
+    FIGSIZE = (15, 15)
+
     def __init__(self, n_img=5):
-        plt.ion()
-
         self.authomatic = False
         self.interval = 1
 
-        self.__create_figure(n_img)
-
-    def __create_figure(self, n_img, keep_unused_axes=False):
+        self.colorbars = []
         self.n_img = n_img
+        if n_img == 1:
+            self.fig = plt.Figure(self.FIGSIZE)
+            self.axes = [plt.axes()]
+        elif n_img > 1:
+            self.__create_figure()
+        else:
+            raise Exception("Bad number of images")
+
+    def __create_figure(self, keep_unused_axes=False):
         nrows = 2
         if (self.n_img % 2) == 0:
             columns = int(self.n_img / nrows)
         else:
             columns = int((self.n_img / nrows) + 1)
-        self.fig, self._axes = plt.subplots(nrows=nrows, ncols=columns, figsize=(15, 15))
+        self.fig, self._axes = plt.subplots(nrows=nrows, ncols=columns, figsize=self.FIGSIZE)
         self.axes = self._axes.flatten()[:self.n_img]
-        self.unused_axes = self._axes.flatten()[n_img:]
+        self.unused_axes = self._axes.flatten()[self.n_img:]
         if not keep_unused_axes:
             for uaxes in self.unused_axes:
                 uaxes.remove()
             self.unused_axes = []
 
         self.fig.canvas.set_window_title('Interaction figure')
-        self.colorbars = []
 
     def _multiplot(self, images, cmap='Greys'):
         """
@@ -53,7 +59,6 @@ class InteractivePlot:
             image = img['img']
             title = img['title']
 
-            # ax = plt.subplot(nrows, columns, i + 1)
             ax.clear()
             ax.set_title(title)
             ax.axis('off')
@@ -79,14 +84,9 @@ class InteractivePlot:
 
     def multi(self, images, cmap="Greys"):
         if len(images) > len(self.axes):
-            self.__create_figure(self.n_img)
+            self.__create_figure()
 
         self._multiplot(images, cmap)
-        if self.authomatic:
-            self.fig.canvas.start_event_loop(self.interval)
-        else:
-            while not self.fig.waitforbuttonpress(0):
-                pass
 
     def save_multiplot(self, filename, images, cmap="Greys"):
         self._multiplot(images, cmap)
