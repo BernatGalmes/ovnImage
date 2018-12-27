@@ -51,7 +51,7 @@ class MultiPlot:
 
         self.fig.canvas.set_window_title('Interaction figure')
 
-    def _multiplot(self, images, cmap='Greys'):
+    def _multiplot(self, images, cmap='Greys', title=None):
         """
         Help to plot a multiple image figure
         :param images: list of dictionaries with structure:
@@ -62,9 +62,13 @@ class MultiPlot:
             "cmap": image matplotlib colormap --> https://matplotlib.org/examples/color/colormaps_reference.html
             }
         :param cmap: Default color map to use in all subplots
+        :param title: Main title to show in the figure.
 
         :return:
         """
+        if title is not None:
+            self.fig.suptitle(title, fontsize=16)
+
         for cb in self.colorbars:
             cb.remove()
         self.colorbars = []
@@ -92,7 +96,7 @@ class MultiPlot:
                 cax = divider.append_axes('right', size='5%', pad=0.05)
                 cb = self.fig.colorbar(imshow, cax=cax, orientation='vertical')
 
-    def multi(self, images, cmap="Greys"):
+    def multi(self, images, cmap="Greys", title=None):
         """
         Plot a multiple image figure in a window.
 
@@ -104,13 +108,14 @@ class MultiPlot:
             "cmap": image matplotlib colormap --> https://matplotlib.org/examples/color/colormaps_reference.html
             }
         :param cmap: Default color map to use in all subplots
+        :param title: Main title to show in the figure.
 
         :return:
         """
         if len(images) > len(self.axes):
             self.__create_figure()
 
-        self._multiplot(images, cmap)
+        self._multiplot(images, cmap, title)
 
     def save_multiplot(self, filename, images, cmap="Greys"):
         """

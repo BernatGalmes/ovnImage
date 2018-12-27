@@ -31,7 +31,7 @@ class InteractivePlot(MultiPlot):
         self.authomatic = value
         self.interval = time
 
-    def multi(self, images, cmap="Greys"):
+    def multi(self, images, cmap="Greys", title=None):
         """
         Plot a multiple image figure in a window.
 
@@ -43,10 +43,11 @@ class InteractivePlot(MultiPlot):
             "cmap": image matplotlib colormap --> https://matplotlib.org/examples/color/colormaps_reference.html
             }
         :param cmap: Default color map to use in all subplots
-
+        :param title: Main title to show in the figure.
+        
         :return:
         """
-        super().multi(images, cmap)
+        super().multi(images, cmap, title)
         if self.authomatic:
             self.fig.canvas.start_event_loop(self.interval)
         else:
