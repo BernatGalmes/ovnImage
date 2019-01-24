@@ -95,7 +95,8 @@ class MultiPlot:
                 divider = make_axes_locatable(ax)
                 cax = divider.append_axes('right', size='5%', pad=0.05)
                 cb = self.fig.colorbar(imshow, cax=cax, orientation='vertical')
-
+                self.colorbars.append(cb)
+                
     def multi(self, images, cmap="Greys", title=None):
         """
         Plot a multiple image figure in a window.
