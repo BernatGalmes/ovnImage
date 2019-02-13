@@ -37,7 +37,11 @@ def reduce_image(img, size):
     """
 
     witdh, height = size
-    back = np.full((witdh, height), 255)
+    if len(img.shape) > 2:
+        shape = (witdh, height, img.shape[2])
+    else:
+        shape = (witdh, height)
+    back = np.full(shape, 255)
     shap = img.shape
 
     if shap[0] > shap[1]:
@@ -51,6 +55,11 @@ def reduce_image(img, size):
 
     w_off = int((back.shape[0] - aux.shape[0]) / 2)
     h_off = int((back.shape[1] - aux.shape[1]) / 2)
-    back[w_off:aux.shape[0] + w_off, h_off:aux.shape[1] + h_off] = aux
+
+    if len(img.shape) > 2:
+        back[w_off:aux.shape[0] + w_off, h_off:aux.shape[1] + h_off, :] = aux
+    else:
+        back[w_off:aux.shape[0] + w_off, h_off:aux.shape[1] + h_off] = aux
 
     return back
+
