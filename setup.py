@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='ovnImage',
-      version='0.2',
+      version='0.2.1',
       description='Useful helper functions of image processing and machine learning',
       url='',
       author="Miquel Miró Nicolau, Bernat Galmés Rubert, Dr. Gabriel Moyà Alcover",
