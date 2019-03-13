@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import os
-import copy
+from copy import copy
 
 import sklearn.metrics as metrics
 
@@ -352,3 +352,24 @@ def mask_2BOOL(mask):
     img_cp[mask != 0] = True
 
     return img_cp
+
+
+def RGB_2MASK(img, threshold):
+    """
+    Create a binary image from multichannel image. First does the thresholding and then use the and operation
+
+    :param img:
+    :param threshold:
+    :return:
+    """
+
+    mask = copy(img)
+    mask[mask < threshold] = 0
+    mask[mask >= threshold] = 1
+
+    r, g, b = cv2.split(mask)
+    mask = cv2.bitwise_and(r, g)
+    mask = cv2.bitwise_and(mask, b)
+    mask = cv2.bitwise_not(mask) + 2
+
+    return mask
