@@ -96,7 +96,10 @@ class MultiPlot:
                 cax = divider.append_axes('right', size='5%', pad=0.05)
                 cb = self.fig.colorbar(imshow, cax=cax, orientation='vertical')
                 self.colorbars.append(cb)
-                
+
+    def update(self, images, cmap="Greys"):
+        return self._multiplot(images, cmap)
+
     def multi(self, images, cmap="Greys", title=None):
         """
         Plot a multiple image figure in a window.
@@ -140,3 +143,7 @@ class MultiPlot:
         """
         self._multiplot(images, cmap)
         plt.savefig(filename, bbox_inches='tight')
+
+    def attach_key_press_event(self, function):
+        self.fig.canvas.mpl_connect("key_press_event", function)
+
