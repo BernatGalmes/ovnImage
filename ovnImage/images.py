@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def binary2RGB(image):
+def binary2RGB(image: np.ndarray) -> np.ndarray:
     """
     Convert a binary image to RGB, black & white image
     O values to BLACK others to white
@@ -17,7 +17,7 @@ def binary2RGB(image):
     return res
 
 
-def grays2binary(image_grays):
+def grays2binary(image_grays: np.ndarray) -> np.ndarray:
     """
     Convert a grayscale image to a binary one
     :param image_grays: one chanel image
@@ -28,10 +28,11 @@ def grays2binary(image_grays):
     return results
 
 
-def reduce_image(img, size):
+def reduce_image(img: np.ndarray, size: int, back_value: int=255) -> np.ndarray:
     """
     Resize the image without deformation
-    :param img:
+    :param back_value: int value to fill background if not fit perfectly
+    :param img: np.ndarray
     :param size: Tuple (witdh, height)
     :return:
     """
@@ -41,7 +42,7 @@ def reduce_image(img, size):
         shape = (witdh, height, img.shape[2])
     else:
         shape = (witdh, height)
-    back = np.full(shape, 255)
+    back = np.full(shape, back_value)
     shap = img.shape
 
     if shap[0] > shap[1]:
@@ -62,4 +63,3 @@ def reduce_image(img, size):
         back[w_off:aux.shape[0] + w_off, h_off:aux.shape[1] + h_off] = aux
 
     return back
-
