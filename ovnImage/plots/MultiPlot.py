@@ -10,7 +10,7 @@ class MultiPlot:
 
     FIGSIZE = (15, 15)
 
-    def __init__(self, n_img=5):
+    def __init__(self, n_img=5, n_rows=2):
         """
         Init the object with the number of images/plots that must contain each Figure.
 
@@ -18,6 +18,7 @@ class MultiPlot:
         """
         self.colorbars = []
         self.n_img = n_img
+        self.n_rows = n_rows
         if n_img == 1:
             self.fig = plt.Figure(self.FIGSIZE)
             self.axes = [plt.axes()]
@@ -36,12 +37,11 @@ class MultiPlot:
 
         :return:
         """
-        nrows = 2
         if (self.n_img % 2) == 0:
-            columns = int(self.n_img / nrows)
+            columns = int(self.n_img / self.n_rows)
         else:
-            columns = int((self.n_img / nrows) + 1)
-        self.fig, self._axes = plt.subplots(nrows=nrows, ncols=columns, figsize=self.FIGSIZE)
+            columns = int((self.n_img / self.n_rows) + 1)
+        self.fig, self._axes = plt.subplots(nrows=self.n_rows, ncols=columns, figsize=self.FIGSIZE)
         self.axes = self._axes.flatten()[:self.n_img]
         self.unused_axes = self._axes.flatten()[self.n_img:]
         if not keep_unused_axes:
