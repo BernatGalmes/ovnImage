@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
@@ -10,20 +11,33 @@ class MultiPlot:
 
     FIGSIZE = (15, 15)
 
-    def __init__(self, n_img=5, n_rows=2):
+    def __init__(self, n_img=5, n_rows=2, keep_unused_axes=True):
         """
         Init the object with the number of images/plots that must contain each Figure.
-
-        :param n_img: Number of images/plots of the figures
+        :param n_img: Tuple|integer Number of images/plots in each figure, or the shape of the subplots.
+        :param n_rows: integer If the shape of the subplots are not set, use this param to fix the number of row plots.
+        :param keep_unused_axes: bool Specify if you want to delete the unused axes.
         """
+
+        if isinstance(n_img, tuple):
+            self.n_rows, self. n_columns = n_img
+            self.n_img = n_img[0]*n_img[1]
+
+        else:
+            self.n_rows = n_rows
+            if (self.n_img % 2) == 0:
+                self.n_columns = int(self.n_img / self.n_rows)
+            else:
+                self.n_columns = int((self.n_img / self.n_rows) + 1)
+
+            self.n_img = n_img
+
         self.colorbars = []
-        self.n_img = n_img
-        self.n_rows = n_rows
-        if n_img == 1:
+        if self.n_img == 1:
             self.fig = plt.Figure(self.FIGSIZE)
             self.axes = [plt.axes()]
-        elif n_img > 1:
-            self.__create_figure()
+        elif self.n_img > 1:
+            self.__create_figure(keep_unused_axes=keep_unused_axes)
         else:
             raise Exception("Bad number of images")
 
@@ -37,11 +51,7 @@ class MultiPlot:
 
         :return:
         """
-        if (self.n_img % 2) == 0:
-            columns = int(self.n_img / self.n_rows)
-        else:
-            columns = int((self.n_img / self.n_rows) + 1)
-        self.fig, self._axes = plt.subplots(nrows=self.n_rows, ncols=columns, figsize=self.FIGSIZE)
+        self.fig, self._axes = plt.subplots(nrows=self.n_rows, ncols=self. n_columns, figsize=self.FIGSIZE)
         self.axes = self._axes.flatten()[:self.n_img]
         self.unused_axes = self._axes.flatten()[self.n_img:]
         if not keep_unused_axes:
@@ -71,16 +81,25 @@ class MultiPlot:
 
         for cb in self.colorbars:
             cb.remove()
+
+        for ax in self.axes:
+            ax.clear()
+            ax.axis('off')
+
+        pos_rows = np.zeros(self.n_rows, dtype=np.uint8)
         self.colorbars = []
         for i, img in enumerate(images):
-            ax = self.axes[i]
+            if 'n_row' in img:
+                n_row = img['n_row']
+                ax = self._axes[n_row, pos_rows[n_row]]
+                pos_rows[n_row] += 1
+            else:
+                ax = self.axes[i]
 
             image = img['img']
             title = img['title']
-
-            ax.clear()
             ax.set_title(title)
-            ax.axis('off')
+
             if 'cmap' in img:
                 imshow = ax.imshow(image, cmap=img['cmap'])
 
