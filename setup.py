@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='ovnImage',
-      version='0.2.2',
+      version='0.3.2',
       description='Useful helper functions of image processing and machine learning',
       url='',
       author="Miquel Miró Nicolau, Bernat Galmés Rubert, Dr. Gabriel Moyà Alcover",
@@ -11,8 +11,11 @@ setup(name='ovnImage',
       install_requires=[
           'scikit-learn',
           'matplotlib',
-          'numpy',
           'seaborn',
+          'pandas',
+          'seaborn',
+          'numpy',
           'scikit-image',
+          'opencv-python'
       ],
       zip_safe=False)
