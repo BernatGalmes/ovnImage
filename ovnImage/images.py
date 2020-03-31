@@ -17,17 +17,6 @@ def binary2RGB(image: np.ndarray) -> np.ndarray:
     return res
 
 
-def grays2binary(image_grays: np.ndarray) -> np.ndarray:
-    """
-    Convert a grayscale image to a binary one
-    :param image_grays: one chanel image
-    :return:
-    """
-    results = np.zeros(image_grays.shape)
-    results[np.not_equal(image_grays, results)] = 1
-    return results
-
-
 def reduce_image(img: np.ndarray, size: int, back_value: int=255) -> np.ndarray:
     """
     Resize the image without deformation

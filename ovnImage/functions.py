@@ -17,6 +17,12 @@ def potencia(input, min_n_items=1, max_n_items=None):
     return out
 
 
+def save_description(path_results, configdata=''):
+    description = input("Describe el experimento que vas a llevar a cabo:")
+    description += "\n" + str(configdata)
+    with open(path_results + "/readme.txt", "w") as text_file:
+        text_file.write(description)
+
 """
     FILE SYSTEM FUNCTIONS
 """
