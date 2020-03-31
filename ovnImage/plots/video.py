@@ -17,5 +17,4 @@ def images2video(images, video_name, fps):
     for image in images:
         video.write(cv2.imread(image))
 
-    # cv2.destroyAllWindows()
     video.release()

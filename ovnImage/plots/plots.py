@@ -5,7 +5,6 @@ import cv2
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 from ..images import binary2RGB
 
@@ -56,31 +55,6 @@ def multiplot(images, filename=None, nrows=2, cmap='Greys'):
         plt.savefig(filename, bbox_inches='tight')
     else:
         plt.show()
-
-
-def plots_correlation_matrix(df, labels=None, absolute=False, method='pearson'):
-    """
-    Get correlation matrix of dataframe columns
-    :param df: pandas dataframe
-    :param labels:  String[]
-                    labels of each dataframe column
-    :return: matplotlib Axes
-            Axes object with the heatmap.
-    """
-    corr = df.corr(method=method)
-
-    if labels is None:
-        labels = corr.columns.values
-
-    if absolute:
-        corr = np.absolute(corr)
-    corrmap = sns.heatmap(corr,
-                          xticklabels=labels,
-                          yticklabels=labels,
-                          center=0)
-    corrmap.set_yticklabels(corrmap.get_yticklabels(), rotation=45, fontsize=8)
-    corrmap.set_xticklabels(corrmap.get_xticklabels(), rotation=90, fontsize=8)
-    return corrmap
 
 
 def plots_segmentation(img, labels):
@@ -137,37 +111,17 @@ def plots_raw_data(df, columns, colors="b"):
     plt.show()
 
 
-# TODO: not tryed
-def biplot(pca, dat):
+def draw_mask_boundaries(img: np.ndarray, mask: np.ndarray, color: tuple, thickness: int = 2):
     """
-    Plot a data biplot on the screen
-    :param dat: DataFrame data to plot
+    Draw the boundaries of a a given mask onto an image.
+
+    :param img: RGB image to draw onto.
+    :param mask: Binary image to use as mask.
+    :param color: tuple of the rgb color to use to draw the contour.
+    :param thickness: Thickness of lines the contours are drawn with.
     :return:
     """
-    print("computing biplot ...")
-    # 0,1 denote PC1 and PC2; change values for other PCs
-    xvector = pca.components_[0]  # see 'prcomp(my_data)$rotation' in R
-    yvector = pca.components_[1]
+    contours, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
-    xs = pca.transform(dat)[:, 0]  # see 'prcomp(my_data)$x' in R
-    ys = pca.transform(dat)[:, 1]
-
-    # visualize projections
-
-    # Note: scale values for arrows and text are a bit inelegant as of now,
-    #       so feel free to play around with them
-
-    # plt.figure(1)
-    for i in range(len(xs)):
-        # circles project documents (ie rows from csv) as points onto PC axes
-        plt.plot(xs[i], ys[i], 'b,')
-        # plt.text(xs[i] * 1.2, ys[i] * 1.2, list(dat.index)[i], color='b')
-
-    for i in range(len(xvector)):
-        # arrows project features (ie columns from csv) as vectors onto PC axes
-        plt.arrow(0, 0, xvector[i] * max(xs), yvector[i] * max(ys),
-                  color='r', width=0.0005, head_width=0.0025)
-        plt.text(xvector[i] * max(xs) * 1.2, yvector[i] * max(ys) * 1.2,
-                 list(dat.columns.values)[i], color='r')
-
-    plt.show()
+    cv2.drawContours(img, contours, contourIdx=-1, thickness=thickness, color=color,
+                     lineType=cv2.LINE_8)
