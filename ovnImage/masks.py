@@ -1,16 +1,51 @@
 import cv2
 import numpy as np
-import os
-from copy import copy
 
 import sklearn.metrics as metrics
 
 
-def mask_evaluation(mask, likelihood):
+def mask_bounding_box(mask: np.ndarray):
+    """
+    Get the minimum enclosing rectangle of a given mask.
+
+    :param mask: binary image
+    :return: None if it is an empty mask or th x, y, width, height bounding box values
+    """
+    indexs = mask.nonzero()
+    if len(indexs[0]) == 0:
+        return None
+
+    # Get the bounding box
+    y_min, y_max = indexs[0].min(), indexs[0].max()
+    x_min, x_max = indexs[1].min(), indexs[1].max()
+
+    # ignore too small bounding boxes
+    if y_min == y_max or x_min == x_max:
+        return None
+    return x_min, y_min, x_max - x_min, y_max - y_min
+
+
+def mask_bounding_circle(mask: np.ndarray):
+    """
+    Get the minium enclosing circle of a given mask
+    :param mask:
+    :return: (x, y), r => integers
+    """
+    _, th = cv2.threshold(mask.copy(), 1, 255, cv2.THRESH_BINARY_INV)
+    _, contours, _ = cv2.findContours(th.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+    cnt = contours[0]
+
+    (x, y), radius = cv2.minEnclosingCircle(cnt)
+    center = (int(x), int(y))
+    radius = int(radius)
+    return center, radius
+
+
+def mask_evaluation(mask: np.ndarray, ground_truth: np.ndarray):
     """
     Get the evaluation metrics of a given mask and his likelihood
     :param mask: Binary image => Mask to evaluate
-    :param likelihood: Binary image => Correct mask
+    :param ground_truth: Binary image => Correct mask
     :raise Incorrect likelihood
     :return: dict{
         "FN"
@@ -26,8 +61,8 @@ def mask_evaluation(mask, likelihood):
     """
     stats = {}
 
-    likelihood = np.copy(likelihood).astype(np.uint8)
-    P = np.count_nonzero(likelihood)  # the number of real positive cases in the data
+    likelihood = np.copy(ground_truth).astype(np.uint8)
+    P = np.count_nonzero(ground_truth)  # the number of real positive cases in the data
     invert_likelihood = np.bitwise_not(likelihood)
     N = np.count_nonzero(invert_likelihood)  # the number of real negative cases in the data
 
@@ -64,14 +99,15 @@ def mask_evaluation(mask, likelihood):
     return stats
 
 
-def mask_sklearn_evaluation(mask, likelihood, pos_label=255):
+def mask_sklearn_evaluation(mask: np.ndarray, ground_truth: np.ndarray, pos_label=255):
     """
     Same than mask_evaluation, but using sklearn library for compute values
     :param mask:
-    :param likelihood:
+    :param ground_truth:
+    :param pos_label: value of the true values
     :return:
     """
-    y_true = likelihood.flatten()
+    y_true = ground_truth.flatten()
     y_pred = mask.flatten()
 
     tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
@@ -99,7 +135,10 @@ def mask_sklearn_evaluation(mask, likelihood, pos_label=255):
 
 def masks_coincidence(mask1, mask2, priority="big_mask"):
     """
-    Get the porcentage of coincidence between two masks of the same shape
+    Get the percentage of coincident pixels between two masks of the same shape.
+
+    If priority is 'small_mask' then the percentage is over the number of pixels of the smaller mask.
+
     :param priority:
     :param mask1:
     :param mask2:
@@ -144,26 +183,12 @@ def mask_onto_mask(mask1, mask2, perc=0.9):
     return equals > (n_pix1 * perc) or equals > (n_pix2 * perc)
 
 
-def mask_2RGB(mask):
-    """
-    Convert a binary image to RGB, black & white image
-    :param mask: binary image
-    :return: binary image coverted to RGB, true values (or 1) to BLACK and other to WHITE
-    """
-    mask = mask.copy()
-    img_result = mask.astype(np.uint8)
-    mask = np.zeros(img_result.shape).astype(np.uint8)
-
-    res = np.zeros((img_result.shape[0], img_result.shape[1], 3), dtype=np.uint8)
-    res[np.equal(img_result, mask)] = (255, 255, 255)
-    return res
-
-
 def mask_fill_holes(mask):
     """
-    Fill all the empty pixels overwhelmed by true pixels
+    Fill all the empty pixels overwhelmed by true pixels.
+
     :param mask: 0, 255 mask
-    :return: O values inside 255 values filled with 255
+    :return: O values inside 255 values are filled with 255
     """
     # Threshold.
     # Set values equal to or above 220 to 0.
@@ -200,39 +225,6 @@ def mask_fill_holes(mask):
     return im_out.astype(np.uint8)
 
 
-def mask_from_RGB_file(file_mask):
-    """
-    Build a mask from a BLACK & white RGB image from file
-    :param file_mask: path of the file to build
-    :return: uint8 image
-    """
-    if not os.path.exists(file_mask):
-        return None
-
-    mask = cv2.imread(file_mask)
-    mask = cv2.cvtColor(mask, cv2.COLOR_RGBA2GRAY).astype(np.uint8)
-    img_bool = mask.astype(np.bool)
-    mask[np.logical_not(img_bool)] = 1
-    mask[img_bool] = 0
-    return mask
-
-
-def mask_bounding_circle(mask):
-    """
-    Get the minium enclosing circle of a given mask
-    :param mask:
-    :return: (x, y), r => integers
-    """
-    _, th = cv2.threshold(mask.copy(), 1, 255, cv2.THRESH_BINARY_INV)
-    _, contours, _ = cv2.findContours(th.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
-    cnt = contours[0]
-
-    (x, y), radius = cv2.minEnclosingCircle(cnt)
-    center = (int(x), int(y))
-    radius = int(radius)
-    return center, radius
-
-
 def mask_delete_contour_in(mask, region):  # TODO: comment function
     """
 
@@ -258,45 +250,10 @@ def mask_delete_contour_in(mask, region):  # TODO: comment function
     return mask
 
 
-def mask_build_circular(image, circle):
-    """
-    Build a circular mask onto the image
-    :param image: 3 channels image
-    :param circle: (int,int, int)
-        tuple with the circle to find, two first values are circle coordinates (x, y), the thirth is the radius
-    :return:
-    """
-    center = (circle[0], circle[1])
-    radius = circle[2]
-
-    mask = np.zeros(image.shape, dtype=np.uint8)
-    cv2.circle(mask, center, radius, (255, 255, 255), -1)
-
-    image_masked = image & mask
-
-    return image_masked
-
-
-def mask_build_circular_boolean(image, circle):
-    """
-    build a circular binary onto the image
-    :param image: image
-    :param circle: (int,int, int)
-        tuple with the circle to find, two first values are circle coordinates (x, y), the thirth is the radius
-    :return:
-    """
-    center = (circle[0], circle[1])
-    radius = circle[2]
-
-    mask = np.zeros(image.shape[:2], dtype=np.uint8)
-    cv2.circle(mask, center, radius, (255), -1)
-
-    return np.asarray(mask, dtype=np.bool)
-
-
 def mask_biggest_connected_component(mask):
     """
-    Get the biggest connected component of a mask
+    Get the biggest connected component of a mask.
+
     :param mask:
     :return:
     """
@@ -320,6 +277,7 @@ def mask_biggest_connected_component(mask):
 def mask_every_separated(masks):
     """
     Get an image of every component in the mask with different color
+
     :param masks:
     :return:
     """
@@ -335,41 +293,3 @@ def mask_every_separated(masks):
         color = color + 1
 
     return multi_mask
-
-
-def mask_2BOOL(mask):
-    """
-    Convert mask to false true value
-
-    TODO: check if numpy astype(bool) make the same
-    :param mask:
-    :return:
-    """
-
-    img_cp = copy.copy(mask)
-
-    img_cp[mask == 0] = False
-    img_cp[mask != 0] = True
-
-    return img_cp
-
-
-def RGB_2MASK(img, threshold):
-    """
-    Create a binary image from multichannel image. First does the thresholding and then use the and operation
-
-    :param img:
-    :param threshold:
-    :return:
-    """
-
-    mask = copy(img)
-    mask[mask < threshold] = 0
-    mask[mask >= threshold] = 1
-
-    r, g, b = cv2.split(mask)
-    mask = cv2.bitwise_and(r, g)
-    mask = cv2.bitwise_and(mask, b)
-    mask = cv2.bitwise_not(mask) + 2
-
-    return mask
