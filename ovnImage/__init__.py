@@ -6,3 +6,5 @@ from .decorators import *
 from .functions import *
 from .images import *
 from .masks import *
+
+from . import metrics as metrics

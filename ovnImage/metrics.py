@@ -57,7 +57,7 @@ def IoU_bounding_box(bb1, bb2) -> float:
         return area_intersection / area_union
 
 
-def getDictMetrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
+def get_classification_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     """
     Get a dictionary with some of the main classification metrics from an array
     of predicted labels and its true labels.
@@ -87,7 +87,7 @@ def getDictMetrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     }
 
 
-def print_stats(y_true: np.ndarray, y_pred: np.ndarray, labels=None) -> dict:
+def print_classification_stats(y_true: np.ndarray, y_pred: np.ndarray, labels=None) -> dict:
     """
     Print in stdout some of the main classification metrics from an array of predicted labels and its true labels.
     Get a dictionary with the computed classification metrics.
