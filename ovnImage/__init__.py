@@ -5,6 +5,6 @@ from .LikelihoodGenerator import *
 from .decorators import *
 from .functions import *
 from .images import *
-from .masks import *
+from . import masks as masks
 
 from . import metrics as metrics

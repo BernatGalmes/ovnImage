@@ -4,7 +4,7 @@ import numpy as np
 import sklearn.metrics as metrics
 
 
-def mask_bounding_box(mask: np.ndarray):
+def bounding_box(mask: np.ndarray):
     """
     Get the minimum enclosing rectangle of a given mask.
 
@@ -25,7 +25,7 @@ def mask_bounding_box(mask: np.ndarray):
     return x_min, y_min, x_max - x_min, y_max - y_min
 
 
-def mask_bounding_circle(mask: np.ndarray):
+def bounding_circle(mask: np.ndarray):
     """
     Get the minium enclosing circle of a given mask
     :param mask:
@@ -41,7 +41,7 @@ def mask_bounding_circle(mask: np.ndarray):
     return center, radius
 
 
-def mask_evaluation(mask: np.ndarray, ground_truth: np.ndarray):
+def evaluation(mask: np.ndarray, ground_truth: np.ndarray):
     """
     Get the evaluation metrics of a given mask and his likelihood
     :param mask: Binary image => Mask to evaluate
@@ -99,7 +99,7 @@ def mask_evaluation(mask: np.ndarray, ground_truth: np.ndarray):
     return stats
 
 
-def mask_sklearn_evaluation(mask: np.ndarray, ground_truth: np.ndarray, pos_label=255):
+def sklearn_evaluation(mask: np.ndarray, ground_truth: np.ndarray, pos_label=255):
     """
     Same than mask_evaluation, but using sklearn library for compute values
     :param mask:
@@ -133,7 +133,7 @@ def mask_sklearn_evaluation(mask: np.ndarray, ground_truth: np.ndarray, pos_labe
     return stats
 
 
-def masks_coincidence(mask1, mask2, priority="big_mask"):
+def coincidence(mask1, mask2, priority="big_mask"):
     """
     Get the percentage of coincident pixels between two masks of the same shape.
 
@@ -162,7 +162,7 @@ def masks_coincidence(mask1, mask2, priority="big_mask"):
     return equals / max_pix
 
 
-def mask_onto_mask(mask1, mask2, perc=0.9):
+def onto_mask(mask1, mask2, perc=0.9):
     """
     Given two masks of the same shape, check if them are one onto the other.
 
@@ -183,7 +183,7 @@ def mask_onto_mask(mask1, mask2, perc=0.9):
     return equals > (n_pix1 * perc) or equals > (n_pix2 * perc)
 
 
-def mask_fill_holes(mask):
+def fill_holes(mask):
     """
     Fill all the empty pixels overwhelmed by true pixels.
 
@@ -225,7 +225,7 @@ def mask_fill_holes(mask):
     return im_out.astype(np.uint8)
 
 
-def mask_delete_contour_in(mask, region):  # TODO: comment function
+def delete_contour_in(mask, region):  # TODO: comment function
     """
 
     :param mask:
@@ -250,7 +250,7 @@ def mask_delete_contour_in(mask, region):  # TODO: comment function
     return mask
 
 
-def mask_biggest_connected_component(mask):
+def biggest_connected_component(mask):
     """
     Get the biggest connected component of a mask.
 
@@ -274,7 +274,7 @@ def mask_biggest_connected_component(mask):
     return mask
 
 
-def mask_every_separated(masks):
+def every_separated(masks):
     """
     Get an image of every component in the mask with different color
 
